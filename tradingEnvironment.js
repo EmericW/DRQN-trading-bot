@@ -6,7 +6,6 @@ class TrainingEnvironment {
         this.step = 0;
         this.fiatWallet = fiatWallet;
         this.shareWallet = shareWallet;
-        this.closed = true;
         this.actions = [];
     }
 
@@ -20,16 +19,19 @@ class TrainingEnvironment {
         return this.steps.slice(this.step, this.windowSize + this.step);
     }
 
+    // sets the current state of the environment to a random position in the data
+    reset() {
+        this.step = Math.floor(Math.random() * this.steps.length - this.windowSize); // eslint-disable-line
+        this.actions = [];
+        this.fiatWallet = this.startValue;
+        this.shareWallet = 0;
+    }
+
     // takes an action in the environment and goes to the next step
     // in the real world we would take an action and wait for a new state once
     // a specific time interval has passed (1h, 4h, 1d are the most popular)
     nextStep(action) {
-        // get the value of the last order
-        let previousValue = 0;
-        if (this.actions.length > 0) {
-            previousValue = this.actions[this.actions.length - 1].value;
-        }
-
+        let reward = 0;
         // go to next step
         this.step += 1;
 
@@ -37,6 +39,7 @@ class TrainingEnvironment {
         switch (action) {
         case 'sell' || 0:
             this.sell();
+            reward = this.calculateReward();
             break;
         case 'buy' || 2:
             this.buy();
@@ -44,17 +47,6 @@ class TrainingEnvironment {
         default:
             this.hold();
             break;
-        }
-
-        // get new value
-        const newValue = this.currentValue();
-
-        let reward = 0;
-
-        // console.log(previousValue, newValue);
-        if (previousValue) {
-            // calculate reward
-            reward = this.calculateReward(previousValue, newValue);
         }
 
         // console.log(
@@ -68,22 +60,19 @@ class TrainingEnvironment {
         // return reward and new state
         return {
             reward,
-            // state: this.state(),
+            nextState: this.state(),
         };
     }
 
     // returns the current price of the share
     sharePrice() {
-        return this.steps[this.windowSize + this.step].close;
+        return this.steps[this.windowSize + this.step][3];
     }
 
     // returns the reward from the previous action
     // eslint-disable-next-line
-    calculateReward(previousValue, newValue) {
-        if (previousValue > newValue) {
-            return -1;
-        }
-        return 1;
+    calculateReward() {
+        return Math.max(this.currentValue() - this.startValue, 0);
     }
 
     // uses all the money in the fiat wallet to buy shares
@@ -134,17 +123,21 @@ class TrainingEnvironment {
         return this.steps.length - this.windowSize - this.step - 1;
     }
 
-    getSummary() {
+    printSummary() {
         // eslint-disable-next-line
         const orders = this.actions.map(action => {
             if (action.action === 'buy' || action.action === 'sell') return action;
         });
 
         console.log(
-            `Started with ${this.startValue}, and ended with ${this.currentValue()} after ${
+            `Ended with ${this.currentValue()} after ${
                 orders.length
-            } trades.`,
+            } trades. Which totals in ${this.profit()} profit.`,
         );
+    }
+
+    profit() {
+        return this.currentValue() - this.startValue;
     }
 }
 
