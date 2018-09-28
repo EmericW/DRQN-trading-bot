@@ -6,7 +6,9 @@ function load(path) {
     content.shift();
     const data = content.map((line) => {
         const values = line.split(',');
-        return [values[1], values[2], values[3], values[4], values[6]];
+        // open, high, low, close, volume
+        // return [values[1], values[2], values[3], values[4], values[6]]; // daily csv
+        return [values[1], values[2], values[3], values[4], values[5]]; // hourly csv
     });
     return data;
 }

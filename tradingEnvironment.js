@@ -1,7 +1,8 @@
 class TrainingEnvironment {
-    constructor(steps = [], windowSize = 50, fiatWallet = 500, shareWallet = 0) {
+    constructor(steps = [], windowSize = 50, episodeSize = 10, fiatWallet = 500, shareWallet = 0) {
         this.startValue = fiatWallet;
         this.windowSize = windowSize;
+        this.episodeSize = episodeSize;
         this.steps = steps;
         this.step = 0;
         this.fiatWallet = fiatWallet;
@@ -21,7 +22,9 @@ class TrainingEnvironment {
 
     // sets the current state of the environment to a random position in the data
     reset() {
-        this.step = Math.floor(Math.random() * this.steps.length - this.windowSize); // eslint-disable-line
+        this.step = Math.floor(
+            Math.random() * this.steps.length - this.windowSize - this.episodeSize, // eslint-disable-line
+        );
         this.actions = [];
         this.fiatWallet = this.startValue;
         this.shareWallet = 0;
@@ -46,6 +49,7 @@ class TrainingEnvironment {
             break;
         default:
             this.hold();
+            reward = this.calculateReward();
             break;
         }
 
@@ -66,13 +70,18 @@ class TrainingEnvironment {
 
     // returns the current price of the share
     sharePrice() {
-        return this.steps[this.windowSize + this.step][3];
+        return this.steps[this.windowSize + this.step - 1][3]; // eslint-disable-line
     }
 
     // returns the reward from the previous action
-    // eslint-disable-next-line
     calculateReward() {
-        return Math.max(this.currentValue() - this.startValue, 0);
+        if (this.actions.length > 2) {
+            return (
+                this.actions[this.actions.length - 1].value -
+                this.actions[this.actions.length - 2].value
+            );
+        }
+        return 0;
     }
 
     // uses all the money in the fiat wallet to buy shares
@@ -129,11 +138,31 @@ class TrainingEnvironment {
             if (action.action === 'buy' || action.action === 'sell') return action;
         });
 
+        const actionString = this.actions
+            .map((item) => {
+                switch (item.action) {
+                case 'hold':
+                    return 'H';
+                case 'buy':
+                    return 'B';
+                default:
+                    return 'S';
+                }
+            })
+            .join('-');
+
         console.log(
-            `Ended with ${this.currentValue()} after ${
+            `Ended with ${this.formatPrice(this.currentValue())} after ${
                 orders.length
-            } trades. Which totals in ${this.profit()} profit.`,
+            } trades. Which totals in ${this.formatPrice(
+                this.profit(),
+            )} profit. Moves: ${actionString}`,
         );
+    }
+
+    // eslint-disable-next-line
+    formatPrice(amount) {
+        return Math.round(amount * 100) / 100;
     }
 
     profit() {

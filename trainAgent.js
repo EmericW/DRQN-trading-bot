@@ -5,12 +5,12 @@ const TrainingEnvironment = require('./tradingEnvironment');
 const Agent = require('./agent');
 const load = require('./csvParser');
 
-const data = load('data/BTC-USD.csv');
-const agent = new Agent(TrainingEnvironment.actions(), 0.95);
-const env = new TrainingEnvironment(data);
-
 const episodes = 500;
-const steps = 25;
+const steps = 50;
+
+const data = load('data/daily/BTC-USD.csv');
+const agent = new Agent(TrainingEnvironment.actions(), 0.95);
+const env = new TrainingEnvironment(data, 50, steps);
 
 (async () => {
     for (let e = 0; e < episodes; e += 1) {

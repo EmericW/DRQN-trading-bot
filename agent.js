@@ -1,7 +1,7 @@
 const tf = require('@tensorflow/tfjs');
 
 class Agent {
-    constructor(actions, gamma = 0.95, epsilon = 0.9, path) {
+    constructor(actions, gamma = 0.95, epsilon = 0.95, path) {
         this.actions = actions;
         this.gamma = gamma;
         this.epsilon = epsilon;
@@ -33,16 +33,17 @@ class Agent {
         );
         this.model.add(tf.layers.dense({ units: this.actions.length, activation: 'linear' }));
         this.model.compile({
-            optimizer: 'sgd',
-            loss: 'meanSquaredError',
-            learningRate: this.learningRate,
+            optimizer: tf.train.adam(this.learningRate),
+            loss: tf.losses.meanSquaredError,
         });
     }
 
     act(state) {
         if (Math.random() <= this.epsilon) {
+            console.log('random action');
             return this.actions[Math.floor(Math.random() * this.actions.length)];
         }
+        console.log('predicted action');
         const prediction = this.model.predict(state);
         return prediction.argMax(1).get(0);
     }
