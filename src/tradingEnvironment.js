@@ -1,3 +1,5 @@
+const colors = require('colors');
+
 class TrainingEnvironment {
     constructor(steps = [], windowSize = 50, episodeSize = 10, fiatWallet = 500, shareWallet = 0) {
         this.startValue = fiatWallet;
@@ -157,14 +159,23 @@ class TrainingEnvironment {
             `Ended with ${this.formatPrice(this.currentValue())} after ${
                 orders.length
             } trades. Which totals in ${this.formatPrice(
-                this.profit(),
+                this.profit(), true,
             )} profit. Moves: ${actionString}`,
         );
     }
 
     // eslint-disable-next-line
-    formatPrice(amount) {
-        return Math.round(amount * 100) / 100;
+    formatPrice(amount, colors) {
+        const price = Math.round(amount * 100) / 100;
+
+        if (colors) {
+            if (price >= 0) {
+                return `${price}`.green;
+            }
+            return `${price}`.red;
+        }
+
+        return price;
     }
 
     profit() {
