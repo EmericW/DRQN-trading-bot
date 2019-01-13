@@ -47,6 +47,7 @@ class TrainingEnvironment {
         case 'buy' || 2:
             this.buy();
             break;
+        case 'hold':
         default:
             this.hold();
             reward = this.calculateReward();

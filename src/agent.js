@@ -5,7 +5,7 @@ class Agent {
         this.actions = actions;
         this.gamma = gamma;
         this.epsilon = epsilon;
-        this.epsilonDecay = 0.995;
+        this.epsilonDecay = 0.999;
         this.epsilonMin = 0.01;
         this.learningRate = 0.001;
 
@@ -40,10 +40,10 @@ class Agent {
 
     act(state) {
         if (Math.random() <= this.epsilon) {
-            console.log('random action');
+            // console.log('random action');
             return this.actions[Math.floor(Math.random() * this.actions.length)];
         }
-        console.log('predicted action');
+        // console.log('predicted action');
         const prediction = this.model.predict(state);
         return prediction.argMax(1).get(0);
     }
