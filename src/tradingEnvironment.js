@@ -23,7 +23,7 @@ class TrainingEnvironment {
     // sets the current state of the environment to a random position in the data
     reset() {
         this.step = Math.floor(
-            Math.random() * this.steps.length - this.windowSize - this.episodeSize, // eslint-disable-line
+            Math.random() * (this.steps.length - this.windowSize - this.episodeSize - 1), // eslint-disable-line
         );
         this.actions = [];
         this.fiatWallet = this.startValue;
@@ -46,6 +46,7 @@ class TrainingEnvironment {
             break;
         case 'buy' || 2:
             this.buy();
+            reward = this.calculateReward();
             break;
         case 'hold':
         default:
@@ -89,11 +90,11 @@ class TrainingEnvironment {
     buy() {
         if (this.fiatWallet > 0) {
             this.shareWallet = this.fiatWallet / this.sharePrice();
+            this.fiatWallet = 0;
             this.actions.push({
                 action: 'buy',
-                value: this.fiatWallet,
+                value: this.shareWallet,
             });
-            this.fiatWallet = 0;
         }
     }
 
@@ -104,7 +105,7 @@ class TrainingEnvironment {
             this.shareWallet = 0;
             this.actions.push({
                 action: 'sell',
-                value: this.fiatWallet,
+                value: this.shareWallet,
             });
         }
     }
@@ -112,7 +113,7 @@ class TrainingEnvironment {
     hold() {
         this.actions.push({
             action: 'hold',
-            value: this.currentValue(),
+            value: this.shareWallet,
         });
     }
 
@@ -135,8 +136,8 @@ class TrainingEnvironment {
 
     printSummary() {
         // eslint-disable-next-line
-        const orders = this.actions.map(action => {
-            if (action.action === 'buy' || action.action === 'sell') return action;
+        const orders = this.actions.filter(action => {
+            return (action.action === 'buy' || action.action === 'sell');
         });
 
         const actionString = this.actions
