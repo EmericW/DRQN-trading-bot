@@ -15,7 +15,7 @@ const files = [
 ];
 let data = '';
 
-files.map((file) => {
+files.foreach((file) => {
     let content = fs.readFileSync(`data/hourly/${file}`, 'utf-8');
     content = content.split('\n');
     console.log(content.pop());

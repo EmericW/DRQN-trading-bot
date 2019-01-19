@@ -22,7 +22,7 @@ class Agent {
             tf.layers.lstm({
                 units: 5,
                 returnSequences: false,
-                inputShape: [50, 5],
+                inputShape: [1440, 5],
             }),
         );
         this.model.add(

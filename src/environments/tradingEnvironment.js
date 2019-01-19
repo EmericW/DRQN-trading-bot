@@ -1,4 +1,4 @@
-const colors = require('colors');
+const colors = require('colors'); // eslint-disable-line
 
 class TrainingEnvironment {
     constructor(steps = [], windowSize = 50, episodeSize = 10, fiatWallet = 500, shareWallet = 0) {
@@ -79,7 +79,7 @@ class TrainingEnvironment {
 
     // returns the reward from the previous action
     calculateReward() {
-        if (this.actions.length > 2) {
+        if (this.actions.length > 1) {
             return (
                 this.actions[this.actions.length - 1].value -
                 this.actions[this.actions.length - 2].value
