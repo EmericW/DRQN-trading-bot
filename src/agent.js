@@ -3,6 +3,7 @@ const tf = require('@tensorflow/tfjs');
 class Agent {
     constructor(actions, gamma = 0.95, epsilon = 0.95, path) {
         this.actions = actions;
+        this.memory = [];
         this.gamma = gamma;
         this.epsilon = epsilon;
         this.epsilonDecay = 0.999;
@@ -22,7 +23,7 @@ class Agent {
             tf.layers.lstm({
                 units: 5,
                 returnSequences: false,
-                inputShape: [1440, 5],
+                inputShape: [360, 5],
             }),
         );
         this.model.add(
@@ -38,21 +39,53 @@ class Agent {
         });
     }
 
+    remember({ state, action, reward, nextState }) {
+        this.memory.push({
+            state,
+            action: this.actions.findIndex(a => a === action),
+            reward,
+            nextState,
+        });
+    }
+
     act(state) {
         if (Math.random() <= this.epsilon) {
-            // console.log('random action');
             return this.actions[Math.floor(Math.random() * this.actions.length)];
         }
-        // console.log('predicted action');
         const prediction = this.model.predict(state);
         return prediction.argMax(1).get(0);
     }
 
-    async train(state, action, reward, nextState) {
-        const target = reward + this.gamma * tf.max(this.model.predict(nextState)).get(); // eslint-disable-line
-        const targetF = this.model.predict(state);
-        targetF.buffer().set(target, 0, action);
-        await this.model.fit(state, targetF, { epochs: 1 });
+    getRandomBatch(batchSize) {
+        const batch = [];
+
+        for (let i = 0; i < batchSize; i += 1) {
+            const sample = this.memory[
+                Math.floor(Math.random() * (this.memory.length - 1))
+            ];
+            batch.push(sample);
+        }
+
+        return batch;
+    }
+
+    async replay(batchSize = 32) {
+        const batch = this.getRandomBatch(batchSize);
+        let lossSum = 0;
+
+        for (let i = 0; i < batch.length; i += 1) {
+            const { state, action, reward, nextState } = batch[i];
+            const target = reward + this.gamma * tf.max(this.model.predict(nextState)).get(); // eslint-disable-line
+            const targetF = this.model.predict(state);
+
+            targetF.buffer().set(target, 0, action);
+            const { history } = await this.model.fit(state, targetF, { epochs: 1 }); // eslint-disable-line
+
+            lossSum += history.loss[0];
+        }
+
+        const averageLoss = lossSum / batchSize;
+        // console.log(`Average loss after replay: ${averageLoss}`);
 
         if (this.epsilon > this.epsilonMin) {
             this.epsilon *= this.epsilonDecay;

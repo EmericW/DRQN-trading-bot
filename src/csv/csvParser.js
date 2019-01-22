@@ -7,7 +7,7 @@ function load(path) {
     const data = content.map((line) => {
         const values = line.split(',');
         // open, high, low, close, volume
-        return [values[1], values[2], values[3], values[4], values[5]];
+        return [values[1], values[2], values[3], values[4], values[6]];
     });
     return data;
 }
