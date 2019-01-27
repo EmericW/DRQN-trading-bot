@@ -6,7 +6,7 @@ class Agent {
         this.memory = [];
         this.gamma = gamma;
         this.epsilon = epsilon;
-        this.epsilonDecay = 0.999;
+        this.epsilonDecay = 0.98;
         this.epsilonMin = 0.01;
         this.learningRate = 0.001;
 
@@ -22,6 +22,13 @@ class Agent {
         this.model.add(
             tf.layers.lstm({
                 units: 5,
+                returnSequences: true,
+                inputShape: [360, 5],
+            }),
+        );
+        this.model.add(
+            tf.layers.lstm({
+                units: 5,
                 returnSequences: false,
                 inputShape: [360, 5],
             }),
@@ -29,6 +36,12 @@ class Agent {
         this.model.add(
             tf.layers.dense({
                 units: 32,
+                activation: 'relu',
+            }),
+        );
+        this.model.add(
+            tf.layers.dense({
+                units: 10,
                 activation: 'relu',
             }),
         );
@@ -42,7 +55,7 @@ class Agent {
     remember({ state, action, reward, nextState }) {
         this.memory.push({
             state,
-            action: this.actions.findIndex(a => a === action),
+            action,
             reward,
             nextState,
         });
@@ -50,10 +63,17 @@ class Agent {
 
     act(state) {
         if (Math.random() <= this.epsilon) {
-            return this.actions[Math.floor(Math.random() * this.actions.length)];
+            return {
+                action: Math.floor(Math.random() * this.actions.length),
+                random: true,
+            };
         }
+
         const prediction = this.model.predict(state);
-        return prediction.argMax(1).get(0);
+        return {
+            action: prediction.argMax(1).get(0),
+            random: false,
+        };
     }
 
     getRandomBatch(batchSize) {

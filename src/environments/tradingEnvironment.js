@@ -38,33 +38,23 @@ class TrainingEnvironment {
     nextStep(action) {
         let reward = 0;
         // go to next step
+        const previousPrice = this.currentValue();
         this.step += 1;
-
         // perform the chosen action
         switch (action) {
-        case 'sell' || 0:
+        case 0:
             this.sell();
-            reward = this.calculateReward();
             break;
-        case 'buy' || 2:
+        case 2:
             this.buy();
-            reward = this.calculateReward();
             break;
-        case 'hold':
+        case 1:
         default:
             this.hold();
-            reward = this.calculateReward();
             break;
         }
 
-        // console.log(
-        //     `Performed action: ${action} on step: ${
-        //         this.step
-        //     }, current share price: ${this.sharePrice()}, profit: ${((newValue - previousValue) /
-        //         newValue) *
-        //         100}%, current value: ${this.currentValue()}`,
-        // );
-
+        reward = (this.currentValue() - previousPrice) * 100;
         // return reward and new state
         return {
             reward,
@@ -95,7 +85,7 @@ class TrainingEnvironment {
             this.fiatWallet = 0;
             this.actions.push({
                 action: 'buy',
-                value: this.shareWallet,
+                value: this.currentValue(),
             });
         }
     }
@@ -107,7 +97,7 @@ class TrainingEnvironment {
             this.shareWallet = 0;
             this.actions.push({
                 action: 'sell',
-                value: this.shareWallet,
+                value: this.currentValue(),
             });
         }
     }
@@ -115,7 +105,7 @@ class TrainingEnvironment {
     hold() {
         this.actions.push({
             action: 'hold',
-            value: this.shareWallet,
+            value: this.currentValue(),
         });
     }
 

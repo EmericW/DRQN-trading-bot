@@ -1,8 +1,6 @@
 const tf = require('@tensorflow/tfjs');
 // require('@tensorflow/tfjs-node');
-const cliProgress = require('cli-progress');
 
-const progressBar = new cliProgress.Bar({}, cliProgress.Presets.shades_classic);
 const TrainingEnvironment = require('./environments/tradingEnvironment');
 const Agent = require('./agent');
 const load = require('./csv/csvParser');
@@ -19,20 +17,24 @@ const env = new TrainingEnvironment(data, windowSize, steps);
     for (let e = 0; e < episodes; e += 1) {
         console.log(`episode: ${e + 1}/${episodes}`);
         env.reset();
-        progressBar.start(steps, 0);
+        let randomMoves = 0;
 
         for (let s = 0; s < steps; s += 1) {
-            progressBar.update(s + 1);
-
             // get current state and reshape
             let state = env.state();
             state = tf.tensor3d([state], [1, windowSize, 5]);
 
             // calculate next step
-            const action = agent.act(state);
+            const {
+                action,
+                random,
+            } = agent.act(state);
+
+            if (random) {
+                randomMoves += 1;
+            }
             // take action, get reward and next state
             const { reward, nextState } = env.nextStep(action);
-
             // add experience to agents memory
             agent.remember({
                 state,
@@ -43,11 +45,12 @@ const env = new TrainingEnvironment(data, windowSize, steps);
 
             if (env.remainingSteps() === 0) break;
         }
+        const randomness = (randomMoves / steps) * 100;
 
         // train agent using random experiences
-        await agent.replay(20); // eslint-disable-line
+        await agent.replay(50); // eslint-disable-line
 
-        progressBar.stop();
         env.printSummary();
+        console.log(`Randomness ${randomness}`);
     }
 })();
