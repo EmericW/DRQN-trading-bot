@@ -22,13 +22,6 @@ class Agent {
         this.model.add(
             tf.layers.lstm({
                 units: 5,
-                returnSequences: true,
-                inputShape: [360, 5],
-            }),
-        );
-        this.model.add(
-            tf.layers.lstm({
-                units: 5,
                 returnSequences: false,
                 inputShape: [360, 5],
             }),
@@ -41,7 +34,7 @@ class Agent {
         );
         this.model.add(
             tf.layers.dense({
-                units: 10,
+                units: 32,
                 activation: 'relu',
             }),
         );
