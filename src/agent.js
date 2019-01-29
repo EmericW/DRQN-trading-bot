@@ -98,7 +98,7 @@ class Agent {
         }
 
         const averageLoss = lossSum / batchSize;
-        // console.log(`Average loss after replay: ${averageLoss}`);
+        console.log(`Average loss after replay: ${averageLoss}`);
 
         if (this.epsilon > this.epsilonMin) {
             this.epsilon *= this.epsilonDecay;
