@@ -52,4 +52,7 @@ const env = new TrainingEnvironment(data, windowSize, steps);
         env.printSummary();
         console.log(`Randomness ${randomness}`);
     }
+
+    console.log('Done training, saving model...');
+    agent.saveModel();
 })();

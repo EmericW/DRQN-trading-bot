@@ -106,7 +106,7 @@ class Agent {
     }
 
     async loadModel(path) {
-        this.model = await tf.loadModel(path);
+        this.model = await tf.loadModel(`file://${path}`);
     }
 
     async saveModel(path = null) {
