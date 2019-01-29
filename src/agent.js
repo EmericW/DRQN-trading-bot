@@ -1,4 +1,4 @@
-const tf = require('@tensorflow/tfjs');
+const tf = require('@tensorflow/tfjs-node');
 
 class Agent {
     constructor(actions, gamma = 0.95, epsilon = 0.95, path) {
@@ -92,7 +92,7 @@ class Agent {
             const targetF = this.model.predict(state);
 
             targetF.buffer().set(target, 0, action);
-            const { history } = await this.model.fit(state, targetF, { epochs: 1 }); // eslint-disable-line
+            const { history } = await this.model.fit(state, targetF, { epochs: 1, verbose: 0 }); // eslint-disable-line
 
             lossSum += history.loss[0];
         }
@@ -109,8 +109,9 @@ class Agent {
         this.model = await tf.loadModel(path);
     }
 
-    async saveModel(path) {
-        await this.model.save(path);
+    async saveModel(path = null) {
+        const defaultPath = `file://${__dirname.split('/').slice(0, -1).join('/')}/models/${+new Date()}`;
+        await this.model.save(path || defaultPath);
     }
 }
 

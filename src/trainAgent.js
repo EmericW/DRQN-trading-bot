@@ -1,5 +1,4 @@
-const tf = require('@tensorflow/tfjs');
-// require('@tensorflow/tfjs-node');
+const tf = require('@tensorflow/tfjs-node');
 
 const TrainingEnvironment = require('./environments/tradingEnvironment');
 const Agent = require('./agent');
