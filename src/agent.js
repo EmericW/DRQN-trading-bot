@@ -6,7 +6,7 @@ class Agent {
         this.memory = [];
         this.gamma = gamma;
         this.epsilon = epsilon;
-        this.epsilonDecay = 0.98;
+        this.epsilonDecay = 0.999;
         this.epsilonMin = 0.01;
         this.learningRate = 0.001;
 
@@ -21,9 +21,20 @@ class Agent {
         this.model = tf.sequential();
         this.model.add(
             tf.layers.lstm({
-                units: 5,
+                units: 2,
                 returnSequences: false,
-                inputShape: [360, 5],
+                inputShape: [20, 2],
+            }),
+        );
+        this.model.add(
+            tf.layers.dense({
+                units: 64,
+                activation: 'relu',
+            }),
+        );
+        this.model.add(
+            tf.layers.dropout({
+                rate: 0.1,
             }),
         );
         this.model.add(
@@ -33,9 +44,19 @@ class Agent {
             }),
         );
         this.model.add(
+            tf.layers.dropout({
+                rate: 0.1,
+            }),
+        );
+        this.model.add(
             tf.layers.dense({
-                units: 32,
+                units: 8,
                 activation: 'relu',
+            }),
+        );
+        this.model.add(
+            tf.layers.dropout({
+                rate: 0.1,
             }),
         );
         this.model.add(tf.layers.dense({ units: this.actions.length, activation: 'linear' }));
@@ -54,8 +75,8 @@ class Agent {
         });
     }
 
-    act(state) {
-        if (Math.random() <= this.epsilon) {
+    act(state, allowRandom = false) {
+        if (Math.random() <= this.epsilon && allowRandom) {
             return {
                 action: Math.floor(Math.random() * this.actions.length),
                 random: true,
@@ -89,9 +110,10 @@ class Agent {
         for (let i = 0; i < batch.length; i += 1) {
             const { state, action, reward, nextState } = batch[i];
             const target = reward + this.gamma * tf.max(this.model.predict(nextState)).get(); // eslint-disable-line
-            const targetF = this.model.predict(state);
 
+            const targetF = this.model.predict(state);
             targetF.buffer().set(target, 0, action);
+
             const { history } = await this.model.fit(state, targetF, { epochs: 1, verbose: 0 }); // eslint-disable-line
 
             lossSum += history.loss[0];
