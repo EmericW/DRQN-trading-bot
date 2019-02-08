@@ -54,17 +54,17 @@ class TrainingEnvironment {
             break;
         }
 
-        reward = (this.currentValue() - previousPrice) * 100;
+        reward = (this.currentValue() - previousPrice) * 10;
         // return reward and new state
         return {
-            reward,
+            reward: Math.max(0, reward),
             nextState: this.state(),
         };
     }
 
     // returns the current price of the share
     sharePrice() {
-        return this.steps[this.windowSize + this.step - 1][3]; // eslint-disable-line
+        return this.steps[this.windowSize + this.step - 1][1]; // eslint-disable-line
     }
 
     // returns the reward from the previous action
@@ -83,11 +83,11 @@ class TrainingEnvironment {
         if (this.fiatWallet > 0) {
             this.shareWallet = this.fiatWallet / this.sharePrice();
             this.fiatWallet = 0;
-            this.actions.push({
-                action: 'buy',
-                value: this.currentValue(),
-            });
         }
+        this.actions.push({
+            action: 'buy',
+            value: this.currentValue(),
+        });
     }
 
     // sells all the shares for fiat
@@ -95,11 +95,11 @@ class TrainingEnvironment {
         if (this.shareWallet > 0) {
             this.fiatWallet = this.shareFiatValue();
             this.shareWallet = 0;
-            this.actions.push({
-                action: 'sell',
-                value: this.currentValue(),
-            });
         }
+        this.actions.push({
+            action: 'sell',
+            value: this.currentValue(),
+        });
     }
 
     hold() {
@@ -132,17 +132,16 @@ class TrainingEnvironment {
             return (action.action === 'buy' || action.action === 'sell');
         });
 
-        const actionString = this.actions
-            .map((item) => {
-                switch (item.action) {
-                case 'hold':
-                    return 'H';
-                case 'buy':
-                    return 'B';
-                default:
-                    return 'S';
-                }
-            })
+        const actionString = orders.map((item) => {
+            switch (item.action) {
+            case 'buy':
+                return 'B';
+            case 'sell':
+                return 'S';
+            default:
+                return 'H';
+            }
+        })
             .join('-');
 
         console.log(

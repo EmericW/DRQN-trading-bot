@@ -9,10 +9,10 @@ function load(path) {
         // open, high, low, close, volume
         return [
             +Number(values[1]).toFixed(2),
-            +Number(values[2]).toFixed(2),
-            +Number(values[3]).toFixed(2),
             +Number(values[4]).toFixed(2),
-            +Number(values[6]).toFixed(2),
+            // +Number(values[3]).toFixed(2),
+            // +Number(values[4]).toFixed(2),
+            // +Number(values[5]).toFixed(2),
         ];
     });
     return data;
