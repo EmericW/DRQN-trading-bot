@@ -80,4 +80,5 @@ typings/
 .dynamodb/
 
 /data
+/models
 .DS_Store
