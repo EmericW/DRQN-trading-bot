@@ -15,11 +15,10 @@ const files = [
 ];
 let data = '';
 
-files.foreach((file) => {
+files.forEach((file) => {
     let content = fs.readFileSync(`data/hourly/${file}`, 'utf-8');
     content = content.split('\n');
-    console.log(content.pop());
-    console.log(content.pop());
+    content.shift();
     content = content.join('\n');
     data += content;
 });
