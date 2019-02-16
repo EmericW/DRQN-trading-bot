@@ -6,7 +6,7 @@ class Agent {
         this.memory = [];
         this.gamma = gamma;
         this.epsilon = epsilon;
-        this.epsilonDecay = 0.999;
+        this.epsilonDecay = 0.995;
         this.epsilonMin = 0.01;
         this.learningRate = 0.001;
 
