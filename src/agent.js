@@ -20,43 +20,32 @@ class Agent {
     createModel() {
         this.model = tf.sequential();
         this.model.add(
+            tf.layers.dense({
+                units: 256,
+                activation: 'relu',
+                inputShape: [50, 4],
+            }),
+        );
+        this.model.add(
+            tf.layers.dropout({
+                rate: 0.1,
+            }),
+        );
+        this.model.add(
+            tf.layers.dense({
+                units: 256,
+                activation: 'relu',
+            }),
+        );
+        this.model.add(
+            tf.layers.dropout({
+                rate: 0.1,
+            }),
+        );
+        this.model.add(
             tf.layers.lstm({
-                units: 2,
+                units: 256,
                 returnSequences: false,
-                inputShape: [20, 2],
-            }),
-        );
-        this.model.add(
-            tf.layers.dense({
-                units: 64,
-                activation: 'relu',
-            }),
-        );
-        this.model.add(
-            tf.layers.dropout({
-                rate: 0.1,
-            }),
-        );
-        this.model.add(
-            tf.layers.dense({
-                units: 32,
-                activation: 'relu',
-            }),
-        );
-        this.model.add(
-            tf.layers.dropout({
-                rate: 0.1,
-            }),
-        );
-        this.model.add(
-            tf.layers.dense({
-                units: 8,
-                activation: 'relu',
-            }),
-        );
-        this.model.add(
-            tf.layers.dropout({
-                rate: 0.1,
             }),
         );
         this.model.add(tf.layers.dense({ units: this.actions.length, activation: 'linear' }));

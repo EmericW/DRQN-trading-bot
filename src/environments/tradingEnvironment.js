@@ -19,7 +19,13 @@ class TrainingEnvironment {
 
     // returns the current state the environment is in
     state() {
-        return this.steps.slice(this.step, this.windowSize + this.step);
+        return this.steps
+            .slice(this.step, this.windowSize + this.step)
+            .map(step => ([
+                ...step,
+                this.fiatWallet,
+                this.shareWallet,
+            ]));
     }
 
     // sets the current state of the environment to a random position in the data

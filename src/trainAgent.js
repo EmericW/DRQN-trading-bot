@@ -6,9 +6,9 @@ const load = require('./csv/csvParser');
 
 const episodes = 1000;
 const steps = 100;
-const windowSize = 20;
+const windowSize = 50;
 
-const data = load('data/daily/gspc.train.csv');
+const data = load('data/daily/btc-usd.train.csv');
 const agent = new Agent(TrainingEnvironment.actions(), 0.95);
 const env = new TrainingEnvironment(data, windowSize, steps);
 
@@ -21,7 +21,7 @@ const env = new TrainingEnvironment(data, windowSize, steps);
         for (let s = 0; s < steps; s += 1) {
             // get current state and reshape
             let state = env.state();
-            state = tf.tensor3d([state], [1, windowSize, 2]);
+            state = tf.tensor3d([state], [1, windowSize, 4]);
 
             // calculate next step
             const {
@@ -39,7 +39,7 @@ const env = new TrainingEnvironment(data, windowSize, steps);
                 state,
                 action,
                 reward,
-                nextState: tf.tensor3d([nextState], [1, windowSize, 2]),
+                nextState: tf.tensor3d([nextState], [1, windowSize, 4]),
             });
 
             if (env.remainingSteps() === 0) break;
