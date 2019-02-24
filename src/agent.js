@@ -5,6 +5,7 @@ class Agent {
      * @param {Array} actions
      * @param {string} path
      * @param {number} windowSize
+     * @param {number} memoryLimit
      * @param {number} gamma
      * @param {number} epsilon
      * @param {number} epsilonDecay
@@ -15,6 +16,7 @@ class Agent {
         actions,
         path,
         windowSize,
+        memoryLimit,
         gamma = 0.95,
         epsilon = 0.95,
         epsilonDecay = 0.995,
@@ -23,6 +25,7 @@ class Agent {
     ) {
         this.actions = actions;
         this.windowSize = +windowSize;
+        this.memoryLimit = +memoryLimit;
         this.gamma = +gamma;
         this.epsilon = +epsilon;
         this.epsilonDecay = +epsilonDecay;
@@ -76,12 +79,19 @@ class Agent {
     }
 
     remember({ state, action, reward, nextState }) {
-        this.memory.push({
-            state,
-            action,
-            reward,
-            nextState,
-        });
+        if (this.memoryLimit && this.memoryLimit >= this.memory.length) {
+            this.memory = this.memory.slice(1);
+        }
+
+        this.memory = [
+            ...this.memory,
+            {
+                state,
+                action,
+                reward,
+                nextState,
+            },
+        ];
     }
 
     act(state, allowRandom = false) {
