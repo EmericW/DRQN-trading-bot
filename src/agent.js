@@ -1,14 +1,34 @@
 const tf = require('@tensorflow/tfjs-node');
 
 class Agent {
-    constructor(actions, gamma = 0.95, epsilon = 0.95, path) {
+    /**
+     * @param {Array} actions
+     * @param {string} path
+     * @param {number} windowSize
+     * @param {number} gamma
+     * @param {number} epsilon
+     * @param {number} epsilonDecay
+     * @param {number} epsilonMin
+     * @param {number} learningRate
+     */
+    constructor(
+        actions,
+        path,
+        windowSize,
+        gamma = 0.95,
+        epsilon = 0.95,
+        epsilonDecay = 0.995,
+        epsilonMin = 0.01,
+        learningRate = 0.001,
+    ) {
         this.actions = actions;
+        this.windowSize = +windowSize;
+        this.gamma = +gamma;
+        this.epsilon = +epsilon;
+        this.epsilonDecay = +epsilonDecay;
+        this.epsilonMin = +epsilonMin;
+        this.learningRate = +learningRate;
         this.memory = [];
-        this.gamma = gamma;
-        this.epsilon = epsilon;
-        this.epsilonDecay = 0.995;
-        this.epsilonMin = 0.01;
-        this.learningRate = 0.001;
 
         if (path) {
             this.loadModel(path);
@@ -23,7 +43,7 @@ class Agent {
             tf.layers.dense({
                 units: 256,
                 activation: 'relu',
-                inputShape: [50, 4],
+                inputShape: [this.windowSize, 4],
             }),
         );
         this.model.add(

@@ -1,14 +1,28 @@
 const colors = require('colors'); // eslint-disable-line
 
 class TrainingEnvironment {
-    constructor(steps = [], windowSize = 50, episodeSize = 10, fiatWallet = 500, shareWallet = 0) {
-        this.startValue = fiatWallet;
-        this.windowSize = windowSize;
-        this.episodeSize = episodeSize;
+    /**
+     * @param {Array} steps
+     * @param {number} windowSize
+     * @param {number} episodeSize
+     * @param {number} fiatWallet
+     * @param {number} shareWallet
+     */
+    constructor(
+        steps = [],
+        windowSize = 50,
+        episodeSize = 10,
+        fiatWallet = 500,
+        shareWallet = 0,
+    ) {
         this.steps = steps;
+        this.windowSize = +windowSize;
+        this.episodeSize = +episodeSize;
+        this.startValue = +fiatWallet;
+        this.shareWallet = +shareWallet;
+
         this.step = 0;
-        this.fiatWallet = fiatWallet;
-        this.shareWallet = shareWallet;
+        this.fiatWallet = +fiatWallet;
         this.actions = [];
     }
 
@@ -23,8 +37,8 @@ class TrainingEnvironment {
             .slice(this.step, this.windowSize + this.step)
             .map(step => ([
                 ...step,
-                this.fiatWallet,
-                this.shareWallet,
+                +this.fiatWallet,
+                +this.shareWallet,
             ]));
     }
 
